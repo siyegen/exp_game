@@ -8,7 +8,7 @@ public class GameManager : MonoBehaviour {
     TileMap currentMap = null;
     Camera cam = null;
 
-    float camDistance = 1.0f;
+    float camDistance = 2.0f;
 
 	// Use this for initialization
 	void Start () {
@@ -24,9 +24,9 @@ public class GameManager : MonoBehaviour {
 
         Vector3 mapPos = currentMap.transform.position;
 
-        Vector3 camTarget = new Vector3(mapPos.x+0.5f, mapPos.y+camDistance, mapPos.z-0.5f);
+        Vector3 camTarget = new Vector3(mapPos.x+0.5f, mapPos.y+camDistance, mapPos.z-1.0f);
         cam.transform.position = camTarget;
-        cam.transform.Rotate(90, 0, 0);
+        cam.transform.Rotate(65, 0, 0);
 
 	}
 	

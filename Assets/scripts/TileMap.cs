@@ -8,48 +8,64 @@ using UnityEngine;
 [RequireComponent(typeof(MeshCollider))]
 public class TileMap : MonoBehaviour {
 
+
+    int cols = 1; //z
+    int rows = 2; //x
 	// Use this for initialization
 	void Start () {
         Debug.Log("Building mesh!");
         BuildMesh();
 	}
-	
-	// Update is called once per frame
-	void Update () {
-		
-	}
     
     void BuildMesh() {
 
+        int numTiles = rows * cols;
+        int numTriangles = numTiles * 2;
+
+        int vertSizeX = cols + 1;
+        int vertSizeZ = rows +1;
+        int numVertices = vertSizeX * vertSizeZ;
+
         Material basicMaterial = Resources.Load<Material>("Materials/Basic");
 
-        Vector3[] vertices = new Vector3[4];
-        int[] triangles = new int[2 * 3];
-        Vector3[] normals = new Vector3[4];
-        Vector2[] uv = new Vector2[4];
+        Vector3[] vertices = new Vector3[numVertices];
+        Vector3[] normals = new Vector3[numVertices];
+        Vector2[] uv = new Vector2[numVertices];
+        int[] triangles = new int[numTriangles * 3];
 
-        vertices[0] = new Vector3(0, 0, 0);
-        vertices[1] = new Vector3(1, 0, 0);
-        vertices[2] = new Vector3(0, 0, -1);
-        vertices[3] = new Vector3(1, 0, -1);
+        for(int i=0, z=0; z < vertSizeZ; z++) {
+            for(int x=0; x < vertSizeX; x++, i++) {
+                vertices[i] = new Vector3(x, 0, z);
+                normals[i] = Vector3.up;
+                // unclear about uv, look up more info
+                uv[i] = new Vector2((float)x/vertSizeX, (float)z/vertSizeZ);
+                Debug.Log("vertex: " + vertices[i]);
+            }
+        }
 
-        triangles[0] = 0;
-        triangles[1] = 3;
-        triangles[2] = 2;
+        // for(int triIndex=0, vertIndex=0, z=0; z < cols; z++) {
+        //     for(int x=0; x < rows; x++, triIndex +=6, vertIndex++) {
+        //         triangles[triIndex + 0] = vertIndex +               0;
+        //         triangles[triIndex + 1] = vertIndex + rows +   1;
+        //         triangles[triIndex + 2] = vertIndex + 1;//x + vertSizeX +   0;
+        //         Debug.Log("1: "+triangles[triIndex+0]+ " 2: "+triangles[triIndex+1]+ " 3: "+triangles[triIndex+2]);
 
-        triangles[3] = 0;
-        triangles[4] = 1;
-        triangles[5] = 3;
+        //         // triangles[triIndex + 3] = i +             0;
+        //         // triangles[triIndex + 4] = i +             1;
+        //         // triangles[triIndex + 5] = i + vertSizeX +   0;
+                
+        //     }
+        // }
 
-        normals[0] = Vector3.up;
-        normals[1] = Vector3.up;
-        normals[2] = Vector3.up;
-        normals[3] = Vector3.up;
-
-        uv[0] = new Vector2(0, 1);
-        uv[1] = new Vector2(1, 1);
-        uv[2] = new Vector2(0, 0);
-        uv[3] = new Vector2(1, 0);
+        for(int z=0; z < cols; z++) {
+            for(int x=0; x < rows; x++) {
+                int index = z * rows + x;
+                int offset = index*6;
+                triangles[offset + 0] = index + 0;
+                triangles[offset + 1] = index + rows + 1;
+                triangles[offset + 2] = index + rows + 0;
+            }
+        }
 
         Mesh mesh = new Mesh();
         mesh.vertices = vertices;
