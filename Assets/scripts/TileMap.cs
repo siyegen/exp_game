@@ -9,8 +9,9 @@ using UnityEngine;
 public class TileMap : MonoBehaviour {
 
 
-    int cols = 1; //z
-    int rows = 2; //x
+    int xSize = 200;
+    int zSize = 200;
+    float tileSize = 1.0f;
 	// Use this for initialization
 	void Start () {
         Debug.Log("Building mesh!");
@@ -19,51 +20,42 @@ public class TileMap : MonoBehaviour {
     
     void BuildMesh() {
 
-        int numTiles = rows * cols;
+        int numTiles = zSize * xSize;
         int numTriangles = numTiles * 2;
 
-        int vertSizeX = cols + 1;
-        int vertSizeZ = rows +1;
-        int numVertices = vertSizeX * vertSizeZ;
+        int vertSizeX = xSize + 1;
+        int vertSizeZ = zSize +1;
+        int numVerts = vertSizeX * vertSizeZ;
 
-        Material basicMaterial = Resources.Load<Material>("Materials/Basic");
+        Vector3[] vertices = new Vector3[numVerts];
+        Vector3[] normals = new Vector3[numVerts];
+        Vector2[] uv = new Vector2[numVerts];
 
-        Vector3[] vertices = new Vector3[numVertices];
-        Vector3[] normals = new Vector3[numVertices];
-        Vector2[] uv = new Vector2[numVertices];
         int[] triangles = new int[numTriangles * 3];
 
-        for(int i=0, z=0; z < vertSizeZ; z++) {
-            for(int x=0; x < vertSizeX; x++, i++) {
-                vertices[i] = new Vector3(x, 0, z);
-                normals[i] = Vector3.up;
+        for(int z=0, index=0; z < vertSizeZ; z++) {
+            for(int x=0; x < vertSizeX; x++, index++) {
+                //int index = z * vertSizeX + x;
+                vertices[z * vertSizeX + x] = new Vector3(x*tileSize, 0, z*tileSize);
+                normals[z * vertSizeX + x] = Vector3.up;
                 // unclear about uv, look up more info
-                uv[i] = new Vector2((float)x/vertSizeX, (float)z/vertSizeZ);
-                Debug.Log("vertex: " + vertices[i]);
+                uv[z * vertSizeX + x] = new Vector2((float)x/vertSizeX, (float)z/vertSizeZ);
+                //Debug.Log("vertex: " + vertices[index]);
             }
         }
+        
+        for(int z=0; z < zSize; z++) {
+            for(int x=0; x < xSize; x++) {
+                int squareIndex = z * xSize + x;
+                int triOffset = squareIndex * 6;
+                triangles[triOffset + 0] = z * vertSizeX + x + 0;
+                triangles[triOffset + 1] = z * vertSizeX + x + vertSizeX + 0;
+                triangles[triOffset + 2] = z * vertSizeX + x + vertSizeX + 1;
 
-        // for(int triIndex=0, vertIndex=0, z=0; z < cols; z++) {
-        //     for(int x=0; x < rows; x++, triIndex +=6, vertIndex++) {
-        //         triangles[triIndex + 0] = vertIndex +               0;
-        //         triangles[triIndex + 1] = vertIndex + rows +   1;
-        //         triangles[triIndex + 2] = vertIndex + 1;//x + vertSizeX +   0;
-        //         Debug.Log("1: "+triangles[triIndex+0]+ " 2: "+triangles[triIndex+1]+ " 3: "+triangles[triIndex+2]);
 
-        //         // triangles[triIndex + 3] = i +             0;
-        //         // triangles[triIndex + 4] = i +             1;
-        //         // triangles[triIndex + 5] = i + vertSizeX +   0;
-                
-        //     }
-        // }
-
-        for(int z=0; z < cols; z++) {
-            for(int x=0; x < rows; x++) {
-                int index = z * rows + x;
-                int offset = index*6;
-                triangles[offset + 0] = index + 0;
-                triangles[offset + 1] = index + rows + 1;
-                triangles[offset + 2] = index + rows + 0;
+                triangles[triOffset + 3] = z * vertSizeX + x +         0;
+                triangles[triOffset + 4] = z * vertSizeX + x + vertSizeX + 1;
+                triangles[triOffset + 5] = z * vertSizeX + x +         1;
             }
         }
 
@@ -73,6 +65,7 @@ public class TileMap : MonoBehaviour {
         mesh.normals = normals;
         mesh.uv = uv;
 
+        Material basicMaterial = Resources.Load<Material>("Materials/Basic");
         MeshFilter meshFilter = GetComponent<MeshFilter>();
         MeshRenderer meshRenderer = GetComponent<MeshRenderer>();
         MeshCollider meshCollider = GetComponent<MeshCollider>();
